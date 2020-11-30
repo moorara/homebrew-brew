@@ -28,7 +28,7 @@ class Changelog < Formula
     build_time_flag = "-X \"#{version_package}.BuildTime=#{build_time}\""
     ldflags = "#{version_flag} #{commit_flag} #{branch_flag} #{go_version_flag} #{build_tool_flag} #{build_time_flag}"
 
-    system "go", "build", "-ldflags", ldflags, "-o", "changelog"
+    system "go", "build", "-ldflags", ldflags, "./cmd/changelog"
 
     bin.install "changelog"
     prefix.install_metafiles
