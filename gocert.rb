@@ -19,7 +19,7 @@ class Gocert < Formula
     go_version = go_version.strip
     build_time = build_time.strip
 
-    version_package = "github.com/moorara/app/version"
+    version_package = "github.com/moorara/gocert/version"
     version_flag = "-X \"#{version_package}.Version=#{version}\""
     commit_flag = "-X \"#{version_package}.Commit=#{commit}\""
     branch_flag = "-X \"#{version_package}.Branch=main\""
