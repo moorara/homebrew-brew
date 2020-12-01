@@ -19,7 +19,7 @@ async function run () {
         const [formula] = file.split('.').slice(0, -1).join('.')
         core.info(`Formula ${formula} found`)
 
-        const content = await fs.promises.readFile(file)
+        const content = await (await fs.promises.readFile(file)).toString()
         const matches = [...content.matchAll(regex)]
         const [, url, tag, revision] = matches[0]
 
