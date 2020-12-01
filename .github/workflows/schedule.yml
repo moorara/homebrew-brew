@@ -1,0 +1,14 @@
+name: Update
+on:
+  schedule:
+    # https://crontab.guru
+    # * is a special character in YAML, so this string needs to be quoted
+    - cron: '0 * * * *'
+jobs:
+  formulas:
+    name: Formulas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Update Formulas
+        uses: ./.github/actions/update-formulas
