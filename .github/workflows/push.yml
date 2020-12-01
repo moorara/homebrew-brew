@@ -1,0 +1,45 @@
+name: Action
+on:
+  push:
+    paths:
+      - '.github/actions/update-formulas/**'
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Installing Packages
+        working-directory: ./.github/actions/update-formulas
+        run: npm install
+      - name: Linting
+        working-directory: ./.github/actions/update-formulas
+        run: npm run lint
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Installing Packages
+        working-directory: ./.github/actions/update-formulas
+        run: npm install
+      - name: Running Tests
+        working-directory: ./.github/actions/update-formulas
+        run: npm run test
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Installing Packages
+        working-directory: ./.github/actions/update-formulas
+        run: npm install
+      - name: Building
+        working-directory: ./.github/actions/update-formulas
+        run: |
+          npm run build
+          if [[ $(git status --porcelain) ]]; then
+            git diff
+            echo -e "\033[1;31mError: you need to run 'npm run build' and check in the built file in dist directory\033[0m"
+            exit 1
+          fi
