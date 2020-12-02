@@ -2,8 +2,8 @@ name: Update Formulas
 author: Milad Irannejad
 description: GitHub action for updating Homebrew formulas.
 inputs:
-  input:
-    description: TBD.
+  github_token:
+    description: The GitHub token provided in github context or GITHUB_TOKEN secret.
     required: true
 outputs:
   output:
