@@ -3,7 +3,7 @@ author: Milad Irannejad
 description: GitHub action for updating Homebrew formulas.
 inputs:
   github_token:
-    description: The GitHub token provided in github context or GITHUB_TOKEN secret.
+    description: TBD.
     required: true
 outputs:
   output:

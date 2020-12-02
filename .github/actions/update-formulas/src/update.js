@@ -15,7 +15,9 @@ async function run () {
 
     // Get GitHub Octokit client
     core.info(JSON.stringify(github.context, null, 2)) // TODO: remove
-    const octokit = github.getOctokit(github.context.token)
+    const token = core.getInput('github_token')
+    core.info(token) // TODO: remove
+    const octokit = github.getOctokit(token)
 
     // Iterate over all files in the current directory to find *.rb files
     const files = await fs.promises.readdir('.')
