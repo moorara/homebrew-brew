@@ -12,3 +12,5 @@ jobs:
       - uses: actions/checkout@v2
       - name: Update Formulas
         uses: ./.github/actions/update-formulas
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
