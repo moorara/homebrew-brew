@@ -1077,7 +1077,14 @@ const remoteName = 'origin'
 const branchName = 'update-formulas'
 const commitMessage = 'Update Formulas'
 const pullRequestTitle = 'Update Formulas'
-const pullRequestBody = ' - [x] Update Formulas'
+
+function getPullRequestBody (updatedItems) {
+  let body = '## Description\n\n'
+  for (const item of updatedItems) {
+    body += `  - [x] Update formula ${item.formula} to tag ${item.tag} and revision ${item.revision}\n`
+  }
+  return body
+}
 
 async function run () {
   try {
@@ -1089,7 +1096,7 @@ async function run () {
     // Create a GitHub Octokit client
     const octokit = github.getOctokit(token)
 
-    let hasChanges = false
+    const updatedItems = []
 
     // Iterate over all files in the current directory to find *.rb files
     const files = await fs.promises.readdir('.')
@@ -1138,41 +1145,34 @@ async function run () {
         await exec.exec('git', ['add', file])
 
         core.info(chalk.yellow(`Formula ${formula} updated to tag ${newTag} and revision ${newRevision}`))
-        hasChanges = true
+        updatedItems.push({ formula, tag: newTag, revision: newRevision })
       }
     }
 
     // Check if there is any new changes in working tree
-    if (hasChanges) {
+    if (updatedItems.length > 0) {
       core.info('--------------------------------------------------------------------------------')
-      core.info(chalk.yellow('Formulas need to be updated.'))
 
       // Configure author
       await exec.exec('git', ['config', 'user.email', userEmail])
       await exec.exec('git', ['config', 'user.name', userName])
 
-      // Create a new commit
-      core.info(chalk.yellow('Creating a new commit ...'))
+      // Create a new branch, commit changes, and push to remote repository
       await exec.exec('git', ['checkout', '-b', branchName])
       await exec.exec('git', ['commit', '-m', commitMessage])
-
-      // Push the commit to the remote repository
-      core.info(chalk.yellow(`Pushing the new commit to ${remoteName} ...`))
-      await exec.exec('git', ['push', '-u', remoteName, branchName])
-
-      // Get the default branch for repository
-      const [owner, repo] = github.context.repository.split('/')
-      const { data: { default_branch: defaultBranch } } = await octokit.pulls.get({ owner, repo })
+      await exec.exec('git', ['push', '-f', '-u', remoteName, branchName])
 
       // Open a new pull request
       core.info(chalk.yellow('Creating a pull request ...'))
+      const [owner, repo] = github.context.repository.split('/')
+      const { data: { default_branch: defaultBranch } } = await octokit.pulls.get({ owner, repo })
       const { data: pull } = await octokit.pulls.create({
         owner,
         repo,
         title: pullRequestTitle,
         head: branchName,
         base: defaultBranch,
-        body: pullRequestBody
+        body: getPullRequestBody(updatedItems)
       })
 
       // Set output variables
