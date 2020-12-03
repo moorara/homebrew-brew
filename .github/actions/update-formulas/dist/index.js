@@ -1096,6 +1096,8 @@ async function run () {
     for (const file of files) {
       if (file.endsWith('.rb')) {
         const formula = file.split('.').slice(0, -1).join('.')
+
+        core.info('--------------------------------------------------------------------------------')
         core.info(chalk.blue(`Formula ${formula} found`))
 
         let content = (await fs.promises.readFile(file)).toString()
@@ -1142,6 +1144,9 @@ async function run () {
 
     // Check if there is any new changes in working tree
     if (hasChanges) {
+      core.info('--------------------------------------------------------------------------------')
+      core.info(chalk.yellow('Formulas need to be updated.'))
+
       // Configure author
       await exec.exec('git', ['config', 'user.email', userEmail])
       await exec.exec('git', ['config', 'user.name', userName])
@@ -1160,7 +1165,7 @@ async function run () {
       const { data: { default_branch: defaultBranch } } = await octokit.pulls.get({ owner, repo })
 
       // Open a new pull request
-      core.info(chalk.yellow('Creating a pull request for updating formulas ...'))
+      core.info(chalk.yellow('Creating a pull request ...'))
       const { data: pull } = await octokit.pulls.create({
         owner,
         repo,
@@ -1174,7 +1179,7 @@ async function run () {
       core.setOutput('pull_number', pull.number)
       core.setOutput('pull_url', pull.html_url)
 
-      core.info(chalk.green(`Pull request for updating formulas created: ${pull.html_url}`))
+      core.info(chalk.green(`Pull request created: ${pull.html_url}`))
     }
   } catch (error) {
     core.setFailed(error.message)
