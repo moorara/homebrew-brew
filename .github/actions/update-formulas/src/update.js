@@ -71,7 +71,7 @@ async function run () {
         // Update the content of the formula file and write it back to disk
         content = content.replace(tagRegex, `tag: "${newTag}"`).replace(revRegex, `revision: "${newRevision}"`)
         await fs.promises.writeFile(file, content)
-        await exec.exec('git', ['add', 'file'])
+        await exec.exec('git', ['add', file])
 
         core.info(chalk.yellow(`Formula ${formula} updated to tag ${newTag} and revision ${newRevision}`))
         hasChanges = true
