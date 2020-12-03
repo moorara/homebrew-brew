@@ -13,11 +13,23 @@ it checks if there is a newer version of formula available and if so, it updates
 The GitHub token provided by `GITHUB_TOKEN` secret.
 For _schedule_ event, this token is not available through github context.
 
+### `user_email`
+
+The email of git user for creating commits.
+
+### `user_name`
+
+The name of git user for for creating commits.
+
 ## Outputs
 
-### `output`
+### `pull_number`
 
-TBD.
+The pull request number for updating formulas (if any).
+
+### `pull_url`
+
+The pull request url for updating formulas (if any).
 
 ## Example Usages
 
