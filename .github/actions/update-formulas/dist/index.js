@@ -1183,6 +1183,7 @@ async function run () {
 
       // Check if there is already a pull request open from previous runs
       // TODO: take pagination into account
+      core.debug('Checking open pull requests ...')
       const { data: pulls } = await octokit.pulls.list({
         owner,
         repo,
@@ -1190,27 +1191,30 @@ async function run () {
         // TODO: add the filter for head
         base: defaultBranch
       })
+      core.debug(`Open pull requests: ${pulls.length}`)
+
       let pull = pulls.find(isPullRequestOpenedPreviously)
+      core.debug(`Pull: ${pull}`)
 
       // Create a new pull request if no pull request is open from previous runs
       if (pull === null) {
         core.info(chalk.yellow('Creating a pull request ...'))
-        const resp = await octokit.pulls.create({
+        pull = (await octokit.pulls.create({
           owner,
           repo,
           title: pullRequestTitle,
           head: branchName,
           base: defaultBranch,
           body: getPullRequestBody(updatedItems)
-        })
-        pull = resp.data
+        })).data
+        core.debug(`Pull request created: ${pull.html_url}`)
       }
 
       // Set output variables
       core.setOutput('pull_number', pull.number)
       core.setOutput('pull_url', pull.html_url)
 
-      core.info(chalk.green(`Pull request created: ${pull.html_url}`))
+      core.info(chalk.green(`Pull request: ${pull.html_url}`))
     }
   } catch (error) {
     core.setFailed(error.message)
