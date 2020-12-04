@@ -114,7 +114,8 @@ async function run () {
       await exec.exec('git', ['push', '-f', '-u', remoteName, branchName])
 
       // Get the default branch of the remote repository
-      const { data: { default_branch: defaultBranch } } = await octokit.pulls.get({ owner, repo })
+      const { data: { default_branch: defaultBranch } } = await octokit.repos.get({ owner, repo })
+      core.debug(`The repository default branch is ${defaultBranch}`)
 
       // Check if there is already a pull request open from previous runs
       // TODO: take pagination into account
