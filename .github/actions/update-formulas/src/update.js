@@ -1,5 +1,6 @@
 const fs = require('fs')
 
+const _ = require('lodash')
 const chalk = require('chalk')
 const core = require('@actions/core')
 const exec = require('@actions/exec')
@@ -9,10 +10,23 @@ const tagRegex = /tag:\s+"(v?[0-9]+\.[0-9]+\.[0-9]+)"/
 const revRegex = /revision:\s+"([0-9a-f]{40})"/
 const urlRegex = /url\s+"(https:\/\/github.com\/(moorara)\/([0-9A-Za-z._-]+))",\s+tag:\s+"(v?[0-9]+\.[0-9]+\.[0-9]+)",\s+revision:\s+"([0-9a-f]{40})"/g
 
+// TODO: get owner and repo automatically
+const owner = 'moorara'
+const repo = 'homebrew-brew'
+const userName = 'homebrew[bot]'
+const userEmail = 'homebrew[bot]@users.noreply.github.com'
+
 const remoteName = 'origin'
 const branchName = 'update-formulas'
 const commitMessage = 'Update Formulas'
 const pullRequestTitle = 'Update Formulas'
+
+function isPullRequestOpenedPreviously (pull) {
+  return (
+    _.get(pull, 'title') === pullRequestTitle
+    // TODO: && _.get(pull, 'user.login') === 'homebrew'
+  )
+}
 
 function getPullRequestBody (updatedItems) {
   let body = '## Description\n\n'
@@ -26,8 +40,6 @@ async function run () {
   try {
     // Get input variables
     const token = core.getInput('github_token')
-    const userEmail = core.getInput('user_email')
-    const userName = core.getInput('user_name')
 
     // Create a GitHub Octokit client
     const octokit = github.getOctokit(token)
@@ -93,23 +105,41 @@ async function run () {
       await exec.exec('git', ['config', 'user.email', userEmail])
       await exec.exec('git', ['config', 'user.name', userName])
 
-      // Create a new branch, commit changes, and push to remote repository
+      // Create a new branch and commit changes
       await exec.exec('git', ['checkout', '-b', branchName])
       await exec.exec('git', ['commit', '-m', commitMessage])
+
+      // Push the branch to the remote repository
+      core.info(chalk.yellow(`Updating remote ${branchName} branch ...`))
       await exec.exec('git', ['push', '-f', '-u', remoteName, branchName])
 
-      // Open a new pull request
-      core.info(chalk.yellow('Creating a pull request ...'))
-      const [owner, repo] = github.context.repository.split('/')
+      // Get the default branch of the remote repository
       const { data: { default_branch: defaultBranch } } = await octokit.pulls.get({ owner, repo })
-      const { data: pull } = await octokit.pulls.create({
+
+      // Check if there is already a pull request open from previous runs
+      // TODO: take pagination into account
+      const { data: pulls } = await octokit.pulls.list({
         owner,
         repo,
-        title: pullRequestTitle,
-        head: branchName,
-        base: defaultBranch,
-        body: getPullRequestBody(updatedItems)
+        state: 'open',
+        // TODO: add the filter for head
+        base: defaultBranch
       })
+      let pull = pulls.find(isPullRequestOpenedPreviously)
+
+      // Create a new pull request if no pull request is open from previous runs
+      if (pull === null) {
+        core.info(chalk.yellow('Creating a pull request ...'))
+        const resp = await octokit.pulls.create({
+          owner,
+          repo,
+          title: pullRequestTitle,
+          head: branchName,
+          base: defaultBranch,
+          body: getPullRequestBody(updatedItems)
+        })
+        pull = resp.data
+      }
 
       // Set output variables
       core.setOutput('pull_number', pull.number)

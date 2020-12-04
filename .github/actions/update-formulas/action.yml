@@ -7,14 +7,6 @@ inputs:
       The GitHub token provided by GITHUB_TOKEN secret.
       For schedule event, this token is not available through github context.
     required: true
-  user_email:
-    description: The email of git user for creating commits.
-    required: false
-    default: homebrew[bot]@users.noreply.github.com
-  user_name:
-    description: The name of git user for for creating commits.
-    required: false
-    default: homebrew[bot]
 outputs:
   pull_number:
     description: The pull request number for updating formulas (if any).
