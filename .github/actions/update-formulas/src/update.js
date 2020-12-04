@@ -127,13 +127,12 @@ async function run () {
         // TODO: add the filter for head
         base: defaultBranch
       })
-      core.debug(`Open pull requests: ${pulls.length}`)
 
       let pull = pulls.find(isPullRequestOpenedPreviously)
-      core.debug(`Pull: ${pull}`)
+      core.debug(pull ? `Pull request found: ${pull.number}` : 'No open pull request found')
 
       // Create a new pull request if no pull request is open from previous runs
-      if (pull === null) {
+      if (!pull) {
         core.info(chalk.yellow('Creating a pull request ...'))
         pull = (await octokit.pulls.create({
           owner,
