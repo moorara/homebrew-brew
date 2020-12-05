@@ -3,8 +3,8 @@ class Flax < Formula
   license "ISC"
   homepage "https://github.com/moorara/flax"
   url "https://github.com/moorara/flax.git",
-    tag: "v0.1.2",
-    revision: "6d2b7b75ba7cb59912fcdab260acfe5d2e5e2c0c"
+    tag: "v0.1.3",
+    revision: "b11591c8a7fed7f560fe74b395e26b210394aab0"
   head "https://github.com/moorara/flax.git",
     branch: "main"
 
