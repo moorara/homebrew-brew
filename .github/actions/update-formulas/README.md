@@ -15,6 +15,10 @@ For _schedule_ event, this token is not available through github context.
 
 ## Outputs
 
+### `updated`
+
+Determines whether or not there has been any formula update.
+
 ### `pull_number`
 
 The pull request number for updating formulas (if any).

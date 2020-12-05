@@ -8,6 +8,8 @@ inputs:
       For schedule event, this token is not available through github context.
     required: true
 outputs:
+  updated:
+    description: Determines whether or not there has been any formula update.
   pull_number:
     description: The pull request number for updating formulas (if any).
   pull_url:
