@@ -10,7 +10,7 @@ const color = require('./color')
 
 const tagRegex = /tag:\s+"(v?[0-9]+\.[0-9]+\.[0-9]+)"/
 const revRegex = /revision:\s+"([0-9a-f]{40})"/
-const urlRegex = /url\s+"(https:\/\/github.com\/(moorara)\/([0-9A-Za-z._-]+))",\s+tag:\s+"(v?[0-9]+\.[0-9]+\.[0-9]+)",\s+revision:\s+"([0-9a-f]{40})"/g
+const urlRegex = /url\s+"(https:\/\/github.com\/([0-9A-Za-z._-]+)\/([0-9A-Za-z._-]+))",\s+tag:\s+"(v?[0-9]+\.[0-9]+\.[0-9]+)",\s+revision:\s+"([0-9a-f]{40})"/g
 
 function isPullRequestOpenedPreviously (pull) {
   return (
@@ -20,10 +20,18 @@ function isPullRequestOpenedPreviously (pull) {
 }
 
 function getPullRequestBody (updatedItems) {
-  let body = '## Description\n\n'
+  let body = `## Description
+
+This pull request is created automatically.
+
+### Updates
+
+`
+
   for (const item of updatedItems) {
-    body += `  - [x] Update formula **${item.formula}** to tag **${item.tag}** and revision *${item.revision}*\n`
+    body += `  - [x] Update formula **${item.formula}** to **${item.tag}**\n`
   }
+
   return body
 }
 
@@ -46,7 +54,7 @@ async function run () {
         core.info('--------------------------------------------------------------------------------')
         core.info(color.blue(`Formula ${formula} found`))
 
-        let content = (await fs.promises.readFile(file)).toString()
+        let content = await fs.promises.readFile(file, { encoding: 'utf8' })
         const matches = [...content.matchAll(urlRegex)]
         let [, url, owner, repo, tag, revision] = matches[0]
 
@@ -89,62 +97,66 @@ async function run () {
     }
 
     // Check if there is any new changes in working tree
-    if (updatedItems.length > 0) {
-      core.info('--------------------------------------------------------------------------------')
+    if (updatedItems.length === 0) {
+      core.setOutput('updated', false)
+      return
+    }
 
-      // Configure author
-      await exec.exec('git', ['config', 'user.email', config.gitUserEmail])
-      await exec.exec('git', ['config', 'user.name', config.gitUserName])
+    core.info('--------------------------------------------------------------------------------')
 
-      // Create a new branch and commit changes
-      await exec.exec('git', ['checkout', '-b', config.branchName])
-      await exec.exec('git', ['commit', '-m', config.commitMessage])
+    // Configure author
+    await exec.exec('git', ['config', 'user.name', config.gitUserName])
+    await exec.exec('git', ['config', 'user.email', config.gitUserEmail])
 
-      // Push the branch to the remote repository
-      core.info(color.yellow(`Updating remote ${config.branchName} branch ...`))
-      await exec.exec('git', ['push', '-f', '-u', config.remoteName, config.branchName])
+    // Create a new branch and commit changes
+    await exec.exec('git', ['checkout', '-b', config.branchName])
+    await exec.exec('git', ['commit', '-m', config.commitMessage])
 
-      // Get the default branch of the remote repository
-      const { data: { default_branch: defaultBranch } } = await octokit.repos.get({
-        owner: config.owner,
-        repo: config.repo
-      })
-      core.debug(`The repository default branch is ${defaultBranch}`)
+    // Push the branch to the remote repository
+    core.info(color.yellow(`Updating remote ${config.branchName} branch ...`))
+    await exec.exec('git', ['push', '-f', '-u', config.remoteName, config.branchName])
 
-      // Check if there is already a pull request open from previous runs
-      // TODO: take pagination into account
-      core.debug('Checking open pull requests ...')
-      const { data: pulls } = await octokit.pulls.list({
+    // Get the default branch of the remote repository
+    const { data: { default_branch: defaultBranch } } = await octokit.repos.get({
+      owner: config.owner,
+      repo: config.repo
+    })
+    core.debug(`The repository default branch is ${defaultBranch}`)
+
+    // Check if there is already a pull request open from previous runs
+    // TODO: take pagination into account
+    core.debug('Checking open pull requests ...')
+    const { data: pulls } = await octokit.pulls.list({
+      owner: config.owner,
+      repo: config.repo,
+      state: 'open',
+      // TODO: add the filter for head
+      base: defaultBranch
+    })
+
+    let pull = pulls.find(isPullRequestOpenedPreviously)
+    core.debug(pull ? `Pull request found: ${pull.number}` : 'No open pull request found')
+
+    // Create a new pull request if no pull request is open from previous runs
+    if (!pull) {
+      core.info(color.yellow('Creating a pull request ...'))
+      pull = (await octokit.pulls.create({
         owner: config.owner,
         repo: config.repo,
-        state: 'open',
-        // TODO: add the filter for head
-        base: defaultBranch
-      })
-
-      let pull = pulls.find(isPullRequestOpenedPreviously)
-      core.debug(pull ? `Pull request found: ${pull.number}` : 'No open pull request found')
-
-      // Create a new pull request if no pull request is open from previous runs
-      if (!pull) {
-        core.info(color.yellow('Creating a pull request ...'))
-        pull = (await octokit.pulls.create({
-          owner: config.owner,
-          repo: config.repo,
-          title: config.pullRequestTitle,
-          head: config.branchName,
-          base: defaultBranch,
-          body: getPullRequestBody(updatedItems)
-        })).data
-        core.debug(`Pull request created: ${pull.html_url}`)
-      }
-
-      // Set output variables
-      core.setOutput('pull_number', pull.number)
-      core.setOutput('pull_url', pull.html_url)
-
-      core.info(color.green(`Pull request: ${pull.html_url}`))
+        title: config.pullRequestTitle,
+        head: config.branchName,
+        base: defaultBranch,
+        body: getPullRequestBody(updatedItems)
+      })).data
+      core.debug(`Pull request created: ${pull.html_url}`)
     }
+
+    // Set output variables
+    core.setOutput('updated', true)
+    core.setOutput('pull_number', pull.number)
+    core.setOutput('pull_url', pull.html_url)
+
+    core.info(color.green(`Pull request: ${pull.html_url}`))
   } catch (error) {
     core.setFailed(error.message)
   }
