@@ -3,7 +3,7 @@ on:
   schedule:
     # https://crontab.guru
     # * is a special character in YAML, so this string needs to be quoted
-    - cron: '0 * * * *'
+    - cron: '0 8 * * *'
 jobs:
   formulas:
     name: Formulas
