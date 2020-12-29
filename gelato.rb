@@ -3,8 +3,8 @@ class Gelato < Formula
   license "ISC"
   homepage "https://github.com/moorara/gelato"
   url "https://github.com/moorara/gelato.git",
-    tag: "v0.1.3",
-    revision: "4913b9f92ab20a03fea85a517555aacd3e3ef110"
+    tag: "v0.1.4",
+    revision: "99d6e87fdd1494dbe95e2cbd9d8e1dbb49d1c434"
   head "https://github.com/moorara/gelato.git",
     branch: "main"
 
