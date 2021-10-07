@@ -20,15 +20,15 @@
     ]
   },
   "dependencies": {
-    "@actions/core": "^1.2.6",
-    "@actions/exec": "^1.0.4",
-    "@actions/github": "^4.0.0",
-    "lodash": "^4.17.20"
+    "@actions/core": "^1.6.0",
+    "@actions/exec": "^1.1.0",
+    "@actions/github": "^5.0.0",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@zeit/ncc": "0.22.3",
-    "eslint": "7.32.0",
-    "jest": "27.2.4",
-    "standard": "16.0.4"
+    "@vercel/ncc": "^0.31.1",
+    "eslint": "^7.32.0",
+    "jest": "^27.2.4",
+    "standard": "^16.0.4"
   }
 }
