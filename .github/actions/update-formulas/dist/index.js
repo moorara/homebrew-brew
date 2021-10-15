@@ -26864,7 +26864,7 @@ async function run () {
         core.info(color.cyan(`  Current Revision: ${revision}`))
 
         // Get the latest release of the repository
-        const { data: release } = await octokit.repos.getLatestRelease({ owner, repo })
+        const { data: release } = await octokit.rest.repos.getLatestRelease({ owner, repo })
 
         // Check if the latest release is newer than the current tag/revision
         if (tag === release.tag_name) {
@@ -26876,7 +26876,7 @@ async function run () {
         const newTag = release.tag_name
 
         // Fetch the repository tags and get the latest tag
-        const { data: tags } = await octokit.repos.listTags({ owner, repo })
+        const { data: tags } = await octokit.rest.repos.listTags({ owner, repo })
         const { commit: { sha: newRevision } } = tags.find(t => t.name === newTag)
 
         // Update the content of the formula file and write it back to disk
@@ -26910,7 +26910,7 @@ async function run () {
     await exec.exec('git', ['push', '-f', '-u', config.remoteName, config.branchName])
 
     // Get the default branch of the remote repository
-    const { data: { default_branch: defaultBranch } } = await octokit.repos.get({
+    const { data: { default_branch: defaultBranch } } = await octokit.rest.repos.get({
       owner: config.owner,
       repo: config.repo
     })
@@ -26919,7 +26919,7 @@ async function run () {
     // Check if there is already a pull request open from previous runs
     // TODO: take pagination into account
     core.debug('Checking open pull requests ...')
-    const { data: pulls } = await octokit.pulls.list({
+    const { data: pulls } = await octokit.rest.pulls.list({
       owner: config.owner,
       repo: config.repo,
       state: 'open',
@@ -26933,7 +26933,7 @@ async function run () {
     // Create a new pull request if no pull request is open from previous runs
     if (!pull) {
       core.info(color.yellow('Creating a pull request ...'))
-      pull = (await octokit.pulls.create({
+      pull = (await octokit.rest.pulls.create({
         owner: config.owner,
         repo: config.repo,
         title: config.pullRequestTitle,
