@@ -47,14 +47,16 @@ describe('run', () => {
 
   beforeAll(() => {
     mockOctokit = {
-      repos: {
-        get: jest.fn(),
-        listTags: jest.fn(),
-        getLatestRelease: jest.fn()
-      },
-      pulls: {
-        list: jest.fn(),
-        create: jest.fn()
+      rest: {
+        repos: {
+          get: jest.fn(),
+          listTags: jest.fn(),
+          getLatestRelease: jest.fn()
+        },
+        pulls: {
+          list: jest.fn(),
+          create: jest.fn()
+        }
       }
     }
   })
@@ -90,7 +92,7 @@ describe('run', () => {
     github.getOctokit.mockReturnValueOnce(mockOctokit)
     fs.promises.readdir = jest.fn().mockResolvedValueOnce(files)
     fs.promises.readFile = jest.fn().mockResolvedValueOnce(fooContent)
-    mockOctokit.repos.getLatestRelease.mockRejectedValueOnce(new Error('cannot get the latest release'))
+    mockOctokit.rest.repos.getLatestRelease.mockRejectedValueOnce(new Error('cannot get the latest release'))
     await run()
     expect(core.setFailed).toHaveBeenCalledWith('cannot get the latest release')
   })
@@ -102,7 +104,7 @@ describe('run', () => {
     fs.promises.readFile = jest.fn()
       .mockResolvedValueOnce(fooContent)
       .mockResolvedValueOnce(barContent)
-    mockOctokit.repos.getLatestRelease
+    mockOctokit.rest.repos.getLatestRelease
       .mockResolvedValueOnce({ data: { tag_name: 'v0.1.0' } })
       .mockResolvedValueOnce({ data: { tag_name: 'v0.2.0' } })
     await run()
@@ -114,8 +116,8 @@ describe('run', () => {
     github.getOctokit.mockReturnValueOnce(mockOctokit)
     fs.promises.readdir = jest.fn().mockResolvedValueOnce(files)
     fs.promises.readFile = jest.fn().mockResolvedValueOnce(fooContent)
-    mockOctokit.repos.getLatestRelease.mockResolvedValueOnce({ data: { tag_name: 'v0.1.1' } })
-    mockOctokit.repos.listTags.mockRejectedValueOnce(new Error('cannot list tags'))
+    mockOctokit.rest.repos.getLatestRelease.mockResolvedValueOnce({ data: { tag_name: 'v0.1.1' } })
+    mockOctokit.rest.repos.listTags.mockRejectedValueOnce(new Error('cannot list tags'))
     await run()
     expect(core.setFailed).toHaveBeenCalledWith('cannot list tags')
   })
@@ -125,8 +127,8 @@ describe('run', () => {
     github.getOctokit.mockReturnValueOnce(mockOctokit)
     fs.promises.readdir = jest.fn().mockResolvedValueOnce(files)
     fs.promises.readFile = jest.fn().mockResolvedValueOnce(fooContent)
-    mockOctokit.repos.getLatestRelease.mockResolvedValueOnce({ data: { tag_name: 'v0.1.1' } })
-    mockOctokit.repos.listTags.mockResolvedValueOnce({ data: [fooNewTag] })
+    mockOctokit.rest.repos.getLatestRelease.mockResolvedValueOnce({ data: { tag_name: 'v0.1.1' } })
+    mockOctokit.rest.repos.listTags.mockResolvedValueOnce({ data: [fooNewTag] })
     fs.promises.writeFile = jest.fn().mockRejectedValueOnce(new Error('cannot write file'))
     await run()
     expect(core.setFailed).toHaveBeenCalledWith('cannot write file')
@@ -137,8 +139,8 @@ describe('run', () => {
     github.getOctokit.mockReturnValueOnce(mockOctokit)
     fs.promises.readdir = jest.fn().mockResolvedValueOnce(files)
     fs.promises.readFile = jest.fn().mockResolvedValueOnce(fooContent)
-    mockOctokit.repos.getLatestRelease.mockResolvedValueOnce({ data: { tag_name: 'v0.1.1' } })
-    mockOctokit.repos.listTags.mockResolvedValueOnce({ data: [fooNewTag] })
+    mockOctokit.rest.repos.getLatestRelease.mockResolvedValueOnce({ data: { tag_name: 'v0.1.1' } })
+    mockOctokit.rest.repos.listTags.mockResolvedValueOnce({ data: [fooNewTag] })
     fs.promises.writeFile = jest.fn().mockResolvedValueOnce()
     exec.exec.mockRejectedValueOnce(new Error('cannot run git add'))
     await run()
@@ -152,10 +154,10 @@ describe('run', () => {
     fs.promises.readFile = jest.fn()
       .mockResolvedValueOnce(fooContent)
       .mockResolvedValueOnce(barContent)
-    mockOctokit.repos.getLatestRelease
+    mockOctokit.rest.repos.getLatestRelease
       .mockResolvedValueOnce({ data: { tag_name: 'v0.1.1' } })
       .mockResolvedValueOnce({ data: { tag_name: 'v0.2.1' } })
-    mockOctokit.repos.listTags
+    mockOctokit.rest.repos.listTags
       .mockResolvedValueOnce({ data: [fooNewTag] })
       .mockResolvedValueOnce({ data: [barNewTag] })
     fs.promises.writeFile = jest.fn().mockResolvedValue()
@@ -174,10 +176,10 @@ describe('run', () => {
     fs.promises.readFile = jest.fn()
       .mockResolvedValueOnce(fooContent)
       .mockResolvedValueOnce(barContent)
-    mockOctokit.repos.getLatestRelease
+    mockOctokit.rest.repos.getLatestRelease
       .mockResolvedValueOnce({ data: { tag_name: 'v0.1.1' } })
       .mockResolvedValueOnce({ data: { tag_name: 'v0.2.1' } })
-    mockOctokit.repos.listTags
+    mockOctokit.rest.repos.listTags
       .mockResolvedValueOnce({ data: [fooNewTag] })
       .mockResolvedValueOnce({ data: [barNewTag] })
     fs.promises.writeFile = jest.fn().mockResolvedValue()
@@ -197,10 +199,10 @@ describe('run', () => {
     fs.promises.readFile = jest.fn()
       .mockResolvedValueOnce(fooContent)
       .mockResolvedValueOnce(barContent)
-    mockOctokit.repos.getLatestRelease
+    mockOctokit.rest.repos.getLatestRelease
       .mockResolvedValueOnce({ data: { tag_name: 'v0.1.1' } })
       .mockResolvedValueOnce({ data: { tag_name: 'v0.2.1' } })
-    mockOctokit.repos.listTags
+    mockOctokit.rest.repos.listTags
       .mockResolvedValueOnce({ data: [fooNewTag] })
       .mockResolvedValueOnce({ data: [barNewTag] })
     fs.promises.writeFile = jest.fn().mockResolvedValue()
@@ -221,10 +223,10 @@ describe('run', () => {
     fs.promises.readFile = jest.fn()
       .mockResolvedValueOnce(fooContent)
       .mockResolvedValueOnce(barContent)
-    mockOctokit.repos.getLatestRelease
+    mockOctokit.rest.repos.getLatestRelease
       .mockResolvedValueOnce({ data: { tag_name: 'v0.1.1' } })
       .mockResolvedValueOnce({ data: { tag_name: 'v0.2.1' } })
-    mockOctokit.repos.listTags
+    mockOctokit.rest.repos.listTags
       .mockResolvedValueOnce({ data: [fooNewTag] })
       .mockResolvedValueOnce({ data: [barNewTag] })
     fs.promises.writeFile = jest.fn().mockResolvedValue()
@@ -246,10 +248,10 @@ describe('run', () => {
     fs.promises.readFile = jest.fn()
       .mockResolvedValueOnce(fooContent)
       .mockResolvedValueOnce(barContent)
-    mockOctokit.repos.getLatestRelease
+    mockOctokit.rest.repos.getLatestRelease
       .mockResolvedValueOnce({ data: { tag_name: 'v0.1.1' } })
       .mockResolvedValueOnce({ data: { tag_name: 'v0.2.1' } })
-    mockOctokit.repos.listTags
+    mockOctokit.rest.repos.listTags
       .mockResolvedValueOnce({ data: [fooNewTag] })
       .mockResolvedValueOnce({ data: [barNewTag] })
     fs.promises.writeFile = jest.fn().mockResolvedValue()
@@ -272,10 +274,10 @@ describe('run', () => {
     fs.promises.readFile = jest.fn()
       .mockResolvedValueOnce(fooContent)
       .mockResolvedValueOnce(barContent)
-    mockOctokit.repos.getLatestRelease
+    mockOctokit.rest.repos.getLatestRelease
       .mockResolvedValueOnce({ data: { tag_name: 'v0.1.1' } })
       .mockResolvedValueOnce({ data: { tag_name: 'v0.2.1' } })
-    mockOctokit.repos.listTags
+    mockOctokit.rest.repos.listTags
       .mockResolvedValueOnce({ data: [fooNewTag] })
       .mockResolvedValueOnce({ data: [barNewTag] })
     fs.promises.writeFile = jest.fn().mockResolvedValue()
@@ -287,7 +289,7 @@ describe('run', () => {
       .mockResolvedValueOnce() // git checkout
       .mockResolvedValueOnce() // git commit
       .mockResolvedValueOnce() // git push
-    mockOctokit.repos.get.mockRejectedValueOnce(new Error('cannot get repo'))
+    mockOctokit.rest.repos.get.mockRejectedValueOnce(new Error('cannot get repo'))
     await run()
     expect(core.setFailed).toHaveBeenCalledWith('cannot get repo')
   })
@@ -299,10 +301,10 @@ describe('run', () => {
     fs.promises.readFile = jest.fn()
       .mockResolvedValueOnce(fooContent)
       .mockResolvedValueOnce(barContent)
-    mockOctokit.repos.getLatestRelease
+    mockOctokit.rest.repos.getLatestRelease
       .mockResolvedValueOnce({ data: { tag_name: 'v0.1.1' } })
       .mockResolvedValueOnce({ data: { tag_name: 'v0.2.1' } })
-    mockOctokit.repos.listTags
+    mockOctokit.rest.repos.listTags
       .mockResolvedValueOnce({ data: [fooNewTag] })
       .mockResolvedValueOnce({ data: [barNewTag] })
     fs.promises.writeFile = jest.fn().mockResolvedValue()
@@ -314,8 +316,8 @@ describe('run', () => {
       .mockResolvedValueOnce() // git checkout
       .mockResolvedValueOnce() // git commit
       .mockResolvedValueOnce() // git push
-    mockOctokit.repos.get.mockResolvedValueOnce({ data: { default_branch: 'main' } })
-    mockOctokit.pulls.list.mockRejectedValueOnce(new Error('cannot list pulls'))
+    mockOctokit.rest.repos.get.mockResolvedValueOnce({ data: { default_branch: 'main' } })
+    mockOctokit.rest.pulls.list.mockRejectedValueOnce(new Error('cannot list pulls'))
     await run()
     expect(core.setFailed).toHaveBeenCalledWith('cannot list pulls')
   })
@@ -327,10 +329,10 @@ describe('run', () => {
     fs.promises.readFile = jest.fn()
       .mockResolvedValueOnce(fooContent)
       .mockResolvedValueOnce(barContent)
-    mockOctokit.repos.getLatestRelease
+    mockOctokit.rest.repos.getLatestRelease
       .mockResolvedValueOnce({ data: { tag_name: 'v0.1.1' } })
       .mockResolvedValueOnce({ data: { tag_name: 'v0.2.1' } })
-    mockOctokit.repos.listTags
+    mockOctokit.rest.repos.listTags
       .mockResolvedValueOnce({ data: [fooNewTag] })
       .mockResolvedValueOnce({ data: [barNewTag] })
     fs.promises.writeFile = jest.fn().mockResolvedValue()
@@ -342,8 +344,8 @@ describe('run', () => {
       .mockResolvedValueOnce() // git checkout
       .mockResolvedValueOnce() // git commit
       .mockResolvedValueOnce() // git push
-    mockOctokit.repos.get.mockResolvedValueOnce({ data: { default_branch: 'main' } })
-    mockOctokit.pulls.list.mockResolvedValueOnce({ data: [pull] })
+    mockOctokit.rest.repos.get.mockResolvedValueOnce({ data: { default_branch: 'main' } })
+    mockOctokit.rest.pulls.list.mockResolvedValueOnce({ data: [pull] })
     await run()
     expect(core.setOutput).toHaveBeenCalledWith('updated', true)
     expect(core.setOutput).toHaveBeenCalledWith('pull_number', 1)
@@ -357,10 +359,10 @@ describe('run', () => {
     fs.promises.readFile = jest.fn()
       .mockResolvedValueOnce(fooContent)
       .mockResolvedValueOnce(barContent)
-    mockOctokit.repos.getLatestRelease
+    mockOctokit.rest.repos.getLatestRelease
       .mockResolvedValueOnce({ data: { tag_name: 'v0.1.1' } })
       .mockResolvedValueOnce({ data: { tag_name: 'v0.2.1' } })
-    mockOctokit.repos.listTags
+    mockOctokit.rest.repos.listTags
       .mockResolvedValueOnce({ data: [fooNewTag] })
       .mockResolvedValueOnce({ data: [barNewTag] })
     fs.promises.writeFile = jest.fn().mockResolvedValue()
@@ -372,9 +374,9 @@ describe('run', () => {
       .mockResolvedValueOnce() // git checkout
       .mockResolvedValueOnce() // git commit
       .mockResolvedValueOnce() // git push
-    mockOctokit.repos.get.mockResolvedValueOnce({ data: { default_branch: 'main' } })
-    mockOctokit.pulls.list.mockResolvedValueOnce({ data: [] })
-    mockOctokit.pulls.create.mockRejectedValueOnce(new Error('cannot create pull'))
+    mockOctokit.rest.repos.get.mockResolvedValueOnce({ data: { default_branch: 'main' } })
+    mockOctokit.rest.pulls.list.mockResolvedValueOnce({ data: [] })
+    mockOctokit.rest.pulls.create.mockRejectedValueOnce(new Error('cannot create pull'))
     await run()
     expect(core.setFailed).toHaveBeenCalledWith('cannot create pull')
   })
@@ -386,10 +388,10 @@ describe('run', () => {
     fs.promises.readFile = jest.fn()
       .mockResolvedValueOnce(fooContent)
       .mockResolvedValueOnce(barContent)
-    mockOctokit.repos.getLatestRelease
+    mockOctokit.rest.repos.getLatestRelease
       .mockResolvedValueOnce({ data: { tag_name: 'v0.1.1' } })
       .mockResolvedValueOnce({ data: { tag_name: 'v0.2.1' } })
-    mockOctokit.repos.listTags
+    mockOctokit.rest.repos.listTags
       .mockResolvedValueOnce({ data: [fooNewTag] })
       .mockResolvedValueOnce({ data: [barNewTag] })
     fs.promises.writeFile = jest.fn().mockResolvedValue()
@@ -401,9 +403,9 @@ describe('run', () => {
       .mockResolvedValueOnce() // git checkout
       .mockResolvedValueOnce() // git commit
       .mockResolvedValueOnce() // git push
-    mockOctokit.repos.get.mockResolvedValueOnce({ data: { default_branch: 'main' } })
-    mockOctokit.pulls.list.mockResolvedValueOnce({ data: [] })
-    mockOctokit.pulls.create.mockResolvedValueOnce({ data: pull })
+    mockOctokit.rest.repos.get.mockResolvedValueOnce({ data: { default_branch: 'main' } })
+    mockOctokit.rest.pulls.list.mockResolvedValueOnce({ data: [] })
+    mockOctokit.rest.pulls.create.mockResolvedValueOnce({ data: pull })
     await run()
     expect(core.setOutput).toHaveBeenCalledWith('updated', true)
     expect(core.setOutput).toHaveBeenCalledWith('pull_number', 1)
