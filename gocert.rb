@@ -3,8 +3,8 @@ class Gocert < Formula
   license "ISC"
   homepage "https://github.com/moorara/gocert"
   url "https://github.com/moorara/gocert.git",
-    tag: "v0.1.7",
-    revision: "b667eca3001127d7b6f5c09d9cecd77c95e9d50e"
+    tag: "v0.1.8",
+    revision: "54db22d2bbf0fc39113861d8c705cabd9ccc2ec3"
   head "https://github.com/moorara/gocert.git",
     branch: "main"
 
