@@ -9,7 +9,7 @@ jobs:
     name: Formulas
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Update Formulas
         uses: ./.github/actions/update-formulas
         with:
