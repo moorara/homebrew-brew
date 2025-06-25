@@ -19,16 +19,16 @@
       "/dist/**"
     ]
   },
-  "devDependencies": {
-    "@vercel/ncc": "0.38.3",
-    "eslint": "9.29.0",
-    "jest": "30.0.3",
-    "standard": "17.1.2"
-  },
   "dependencies": {
     "@actions/core": "1.11.1",
     "@actions/exec": "1.1.1",
-    "@actions/github": "6.0.0",
+    "@actions/github": "6.0.1",
     "lodash": "4.17.21"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "0.38.3",
+    "eslint": "8.57.1",
+    "jest": "30.0.3",
+    "standard": "17.1.2"
   }
 }
